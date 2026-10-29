@@ -1,0 +1,18 @@
+# Credentials — never commit these
+.credentials.yaml
+*.credentials
+*.pem
+*.key
+.env
+.env.*
+
+# Local DSH state
+cordis.patch.yml
+!examples/cordis.patch.example.yml
+node_modules/
+pnpm-lock.yaml.bak
+
+# OS / editor noise
+.DS_Store
+__pycache__/
+*.swp

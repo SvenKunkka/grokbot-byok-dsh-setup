@@ -1,0 +1,76 @@
+# Sanitized provider routes for `@deepseek-ai/dsh-llm-pi-ai`.
+#
+# HOW TO USE
+#   1. Copy the `llm-pi-ai` entry below into your profile's cordis.patch.yml.
+#   2. If you already have an `llm-pi-ai` entry, MERGE the `providers` map
+#      instead of pasting a second entry — the adapter replaces the map, so a
+#      duplicate entry silently drops routes.
+#   3. Replace `<your-gateway-host>` placeholders with your real endpoint.
+#   4. Fill keys in Settings -> Models. Never put a key in this file.
+#
+# Why environment-variable names instead of literal keys:
+#   `apiKeyEnv` is a credential reference resolved per request through the
+#   harness credential seam. The config is safe to commit and share; the
+#   secret lives in the credential store and can be rotated without a restart.
+
+- id: llm-pi-ai
+  name: "@deepseek-ai/dsh-llm-pi-ai"
+  config:
+    providers:
+      # ── First-party providers ────────────────────────────────────────
+      openai:
+        displayName: OpenAI
+        apiKeyEnv: OPENAI_API_KEY
+        api: openai-responses
+        baseURL: https://api.openai.com/v1
+
+      anthropic:
+        displayName: Anthropic
+        apiKeyEnv: ANTHROPIC_API_KEY
+        api: anthropic-messages
+        baseURL: https://api.anthropic.com
+
+      openrouter:
+        displayName: OpenRouter
+        apiKeyEnv: OPENROUTER_API_KEY
+        api: openai-completions
+        baseURL: https://openrouter.ai/api/v1
+
+      # ── Self-hosted or proxied gateway ───────────────────────────────
+      # A hand-declared route: pi-ai has no catalog for it, so `api`,
+      # `baseURL` and a non-empty `models` list are all required.
+      # Replace the host and model ids with your own.
+      my-gateway:
+        displayName: My Gateway
+        apiKeyEnv: MY_GATEWAY_API_KEY
+        api: openai-completions
+        baseURL: https://<your-gateway-host>/v1
+        compat:
+          # Use your gateway's own reasoning/thinking vocabulary. Omit if it
+          # speaks plain OpenAI Chat Completions.
+          thinkingFormat: deepseek
+        models:
+          - id: <fast-model-id>
+            name: Fast model
+            contextWindow: 131072
+            maxTokens: 32768
+          - id: <deep-model-id>
+            name: Deep model
+            contextWindow: 131072
+            maxTokens: 32768
+        # Optional: rename reasoning levels to whatever your gateway accepts.
+        # reasoningEfforts:
+        #   off:
+        #   high: high
+        # Optional: retry policy for this route only.
+        # retryPolicy:
+        #   mode: normal
+        #   maxRetries: 3
+
+# Default model used when a session does not pick one.
+# Point it at a cheap route so background turns do not burn premium tokens.
+- id: agent-default-model
+  name: "@deepseek-ai/dsh-agent-default-model"
+  config:
+    provider: openai
+    model: <cheap-model-id>
